@@ -1,113 +1,101 @@
-var fixSprite1, fixSprite2, fixSprite3, fixSprite4;
-var movingSprite;
-var music;
+var helicopterIMG, helicopterSprite, packageSprite,packageIMG;
+var packageBody,ground
+const Engine = Matter.Engine;
+const World = Matter.World;
+const Bodies = Matter.Bodies;
+const Body = Matter.Body;
 
-function preload(){
-music=loadSound("music.mp3");
+function preload()
+{
+	helicopterIMG=loadImage("helicopter.png")
+	packageIMG=loadImage("package.png")
 }
 
-function setup(){
-    
-    createCanvas(800,600);
+function setup() {
+	createCanvas(800, 700);
+	rectMode(CENTER);
+	
 
-    
+	packageSprite=createSprite(width/2, 80, 10,10);
+	packageSprite.addImage(packageIMG)
+	packageSprite.scale=0.2
 
-    movingSprite=createSprite(random(10,750),300,20,20);
-    movingSprite.shapeColor="white";
-    movingSprite.velocityX=3;
-    movingSprite.velocityY=3;
+	helicopterSprite=createSprite(width/2, 200, 10,10);
+	helicopterSprite.addImage(helicopterIMG)
+	helicopterSprite.scale=0.6
 
-   
-    fixSprite1=createSprite(100,590,180,20);
-    fixSprite1.shapeColor="red";
+	groundSprite=createSprite(width/2, height-35, width,10);
+	groundSprite.shapeColor=color(255)
 
-    fixSprite2=createSprite(300,590,180,20);
-    fixSprite2.shapeColor="green";
 
-    fixSprite3=createSprite(500,590,180,20);
-    fixSprite3.shapeColor="blue";
+	engine = Engine.create();
+	world = engine.world;
 
-    fixSprite4=createSprite(700,590,180,20);
-    fixSprite4.shapeColor="yellow";
+	packageBody = Bodies.circle(width/2 , 200 , 5 , {restitution:0.4, isStatic:true});
+	World.add(world, packageBody);
+	
+ 
 
-    
+	//Create a Ground
+	ground = Bodies.rectangle(width/2, 650, width, 10 , {isStatic:true} );
+ 	World.add(world, ground);
 
+ 	boxPosition=width/2-100
+ 	boxY=610;
+
+
+ 	boxleftSprite=createSprite(boxPosition, boxY, 20,100);
+ 	boxleftSprite.shapeColor=color(255,0,0);
+
+ 	boxLeftBody = Bodies.rectangle(boxPosition+20, boxY, 20,100 , {isStatic:true} );
+ 	World.add(world, boxLeftBody);
+
+ 	boxBase=createSprite(boxPosition+100, boxY+40, 200,20);
+ 	boxBase.shapeColor=color(255,0,0);
+
+ 	boxBottomBody = Bodies.rectangle(boxPosition+100, boxY+45-20, 200,20 , {isStatic:true} );
+ 	World.add(world, boxBottomBody);
+
+ 	boxleftSprite=createSprite(boxPosition+200 , boxY, 20,100);
+ 	boxleftSprite.shapeColor=color(255,0,0);
+
+ 	boxRightBody = Bodies.rectangle(boxPosition+200-20 , boxY, 20,100 , {isStatic:true} );
+ 	World.add(world, boxRightBody);
+
+
+	Engine.run(engine);
+  
 }
+
 
 function draw() {
-    background(rgb(10,10,10));
+  rectMode(CENTER);
+  background(0);
+ 
+  packageSprite.x= packageBody.position.x 
+  packageSprite.y= packageBody.position.y 
    
-    if(movingSprite.x<0){
-      music.stop()
-        movingSprite.velocityX=3
-    }else if(movingSprite.x>800){
-      music.stop()
-        movingSprite.velocityX=-3
-    }
-   
-  if(isTouching(movingSprite,fixSprite4)){
-    music.play()
-    movingSprite.shapeColor="yellow";
-    bounceOff(movingSprite,fixSprite4)
-    
-  }
+  drawSprites();
   
-  else if(isTouching(movingSprite,fixSprite3)){
-    music.stop()
-    movingSprite.shapeColor="blue";
-    bounceOff(movingSprite,fixSprite3)
-   
-  }
-    
-  else if(isTouching(movingSprite,fixSprite2)){
-    music.stop()
-    movingSprite.shapeColor="green";
-    bounceOff(movingSprite,fixSprite2)
-    movingSprite.velocityX=0;
-    movingSprite.velocityY=0;
-  }
   
-  else if(isTouching(movingSprite,fixSprite1)){
-    music.stop()
-    movingSprite.shapeColor="red";
-    bounceOff(movingSprite,fixSprite1)
-  }
-
-  if (movingSprite.y<0){
-    music.stop()
-    movingSprite.velocityY=3
-  }
-
-  
-   
-    drawSprites()
+ 
 }
-function isTouching(object1,object2)
-{
+function keyPressed() {
 
-  if(object1.x-object2.x<object2.width/2+object1.width/2&&object2.x-object1.x<object1.width/2+object2.width/2&&object1.y-object2.y<object1.height/2+object2.height/2&&object2.y-object1.y<object1.height/2+object2.height/2){
-   return true;  
-  }
-  else{
-    return false;
-  }
+	if(keyCode === RIGHT_ARROW){
+		helicopterSprite.x =helicopterSprite.x + 20;
+		Matter.Body.translate(packageBody, {x:20,y:0}); 
+	}
+	
+        if(keyCode === LEFT_ARROW){
+			helicopterSprite.x = helicopterSprite.x - 20;
+			Matter.Body.translate(packageBody, {x:-20,y:0}); 
+	}
+
+	if (keyCode === DOWN_ARROW) {
+		Matter.Body.setStatic(packageBody,false); 
+	
+	}
+
 }
 
-function bounceOff(object1,object2){
-
-
-if(object1.x-object2.x<object2.width/2+object1.width/2&&object2.x-object1.x<object1.width/2+object2.width/2){
-object1.velocityX=object1.velocityX*-1
-object2.velocityX=object2.velocityX*-1
-}
-if(object1.y-object2.y<object1.height/2+object2.height/2&&object2.y-object1.y<object1.height/2+object2.height/2){
-  object1.velocityY=object1.velocityY*-1
-object2.velocityY=object2.velocityY*-1
-}
-if(object1.x<0){
-    object1.velocityX=3
-  }
-  else if(object2.x>1200){
-    object2.velocityX=-3
-  }
-}
